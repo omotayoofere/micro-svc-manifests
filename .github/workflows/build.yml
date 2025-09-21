@@ -11,8 +11,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5.0.0
         with:
-          repository: ${{ secret.repository }}
+          repository: ${{ vars.REPO_URL }}
           ref: kube
-          token: ${{ secrets.PIPELINE_TOKEN }}
+          token: ${{ secrets.REPO_TOKEN }}
           fetch-tags: true
           lfs: true
