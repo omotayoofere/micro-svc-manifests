@@ -13,6 +13,6 @@ jobs:
         with:
           repository: ${{ secret.repository }}
           ref: kube
-          token: ${{ secret.token }}
+          token: ${{ secrets.PIPELINE_TOKEN }}
           fetch-tags: true
           lfs: true
