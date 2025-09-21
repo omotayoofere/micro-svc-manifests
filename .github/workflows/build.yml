@@ -1,4 +1,4 @@
-name: Build, Test and deploy <inserts project name>
+name: Build, Test and deploy Emart App
 on:
   push:
     branches:
