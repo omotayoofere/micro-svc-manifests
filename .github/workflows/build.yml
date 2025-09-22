@@ -3,6 +3,10 @@ on:
   repository_dispatch:
     types: [Triggered-from-App-repo]
 jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Repository dispatch event received!"
   #setup:
   #  name: Checkout repository and set metadata
   #  runs-on: ubuntu-latest
@@ -27,53 +31,53 @@ jobs:
   #        echo "timestamp=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
   #        echo "build_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
           
-  setup:
-    name: Shared_Setup
-    uses: ./.github/workflows/shared-checkout.yml
-    with:
-      app: dummy
-      repo_url: ${{ vars.REPO_URL }}
-      repo_branch: ${{ vars.REPO_BRANCH }}
-    secrets: inherit
+  # setup:
+  #   name: Shared_Setup
+  #   uses: ./.github/workflows/shared-checkout.yml
+  #   with:
+  #     app: dummy
+  #     repo_url: ${{ vars.REPO_URL }}
+  #     repo_branch: ${{ vars.REPO_BRANCH }}
+  #   secrets: inherit
 
-  build_and_push:
-    name: Build_and_Push_Docker_Images
-    runs-on: ubuntu-latest
-    needs: setup
-    strategy:
-      matrix:
-        app: [client, nodeapi, javaapi]
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v5
-        with:
-          repository: ${{ vars.REPO_URL }}
-          ref: ${{ vars.REPO_BRANCH }}
-          token: ${{ secrets.REPO_TOKEN }}
-          fetch-tags: true
-          lfs: true
-      - name: Docker Login
-        uses: docker/login-action@v3.5.0
-        with: 
-          username: ${{ vars.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+  # build_and_push:
+  #   name: Build_and_Push_Docker_Images
+  #   runs-on: ubuntu-latest
+  #   needs: setup
+  #   strategy:
+  #     matrix:
+  #       app: [client, nodeapi, javaapi]
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v5
+  #       with:
+  #         repository: ${{ vars.REPO_URL }}
+  #         ref: ${{ vars.REPO_BRANCH }}
+  #         token: ${{ secrets.REPO_TOKEN }}
+  #         fetch-tags: true
+  #         lfs: true
+  #     - name: Docker Login
+  #       uses: docker/login-action@v3.5.0
+  #       with: 
+  #         username: ${{ vars.DOCKER_USERNAME }}
+  #         password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Docker Build and Push
-        run: |
-          IMAGE_NAME=${{ vars.DOCKER_USERNAME }}/${{ matrix.app }}
+  #     - name: Docker Build and Push
+  #       run: |
+  #         IMAGE_NAME=${{ vars.DOCKER_USERNAME }}/${{ matrix.app }}
           
-          echo "Building Docker Image for ${{ matrix.app }}"
+  #         echo "Building Docker Image for ${{ matrix.app }}"
 
-          cd ${{ matrix.app }}
+  #         cd ${{ matrix.app }}
           
-          docker build -t $IMAGE_NAME:latest .
-          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ needs.setup.outputs.commit_hash }}
-          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ needs.setup.outputs.timestamp }}
-          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ needs.setup.outputs.build_number }}
-          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ needs.setup.outputs.build_platform }}
+  #         docker build -t $IMAGE_NAME:latest .
+  #         docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ needs.setup.outputs.commit_hash }}
+  #         docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ needs.setup.outputs.timestamp }}
+  #         docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ needs.setup.outputs.build_number }}
+  #         docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ needs.setup.outputs.build_platform }}
 
-          docker push $IMAGE_NAME:latest
-          docker push $IMAGE_NAME:${{ needs.setup.outputs.commit_hash }}
-          docker push $IMAGE_NAME:${{ needs.setup.outputs.timestamp }}
-          docker push $IMAGE_NAME:${{ needs.setup.outputs.build_number }}
-          docker push $IMAGE_NAME:${{ needs.setup.outputs.build_platform }}
+  #         docker push $IMAGE_NAME:latest
+  #         docker push $IMAGE_NAME:${{ needs.setup.outputs.commit_hash }}
+  #         docker push $IMAGE_NAME:${{ needs.setup.outputs.timestamp }}
+  #         docker push $IMAGE_NAME:${{ needs.setup.outputs.build_number }}
+  #         docker push $IMAGE_NAME:${{ needs.setup.outputs.build_platform }}
