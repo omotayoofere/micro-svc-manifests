@@ -3,10 +3,13 @@ on:
   repository_dispatch:
     types: [Triggered-from-App-repo]
 jobs:
-  debug:
+  log:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Repository dispatch event received!"
+      - name: Print event context
+        run: |
+          echo "Triggered by: ${{ github.event.client_payload.triggered_by }}"
+          echo "Update type: ${{ github.event.client_payload.update }}"
   #setup:
   #  name: Checkout repository and set metadata
   #  runs-on: ubuntu-latest
