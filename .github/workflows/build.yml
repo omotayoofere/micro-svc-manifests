@@ -34,10 +34,10 @@ jobs:
         run: |
           apps="client nodeapi javaapi"
           
-          for dir in $apps;
+          for dir in ${app[@]};
           do
-            echo "Subdirs of $app:"
-            find "$app" -mindepth 1 -maxdepth 1 -type d 
+            echo "Subdirs of $dir:"
+            find "$dir" -mindepth 1 -maxdepth 1 -type d 
           done
 
           
