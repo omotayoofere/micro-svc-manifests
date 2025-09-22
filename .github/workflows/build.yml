@@ -1,15 +1,87 @@
-name: Build, Test and deploy Emart App from external trigger
+name: Build, Test and deploy Emart App
 on:
-  repository_dispatch:
-    types: [Triggered-from-App-repo]
+  push:
+    branches:
+      - main
 jobs:
-  log:
+  build:
+    name: Checkout REPO and containerize applications
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [client, nodeapi, javaapi]
     steps:
-      - name: Print event context
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+        with:
+          repository: ${{ vars.REPO_URL }}
+          ref: ${{ vars.REPO_BRANCH }}
+          token: ${{ secrets.REPO_TOKEN }}
+          fetch-tags: true
+          lfs: true
+          
+      - name: Print Build Metadata
+        id: build_data
+        run: | 
+          echo "commit_hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+          echo "build_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
+          echo "build_platform=GITHUB_ACTIONS" >> $GITHUB_OUTPUT
+          
+      - name: Docker Login
+        uses: docker/login-action@v3.5.0
+        with: 
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker Build and Push
         run: |
-          echo "Triggered by: ${{ github.event.client_payload.triggered_by }}"
-          echo "Update type: ${{ github.event.client_payload.update }}"
+          IMAGE_NAME=${{ vars.DOCKER_USERNAME }}/${{ matrix.app }}
+          
+          echo "Building Docker Image for ${{ matrix.app }}"
+
+          cd ${{ matrix.app }}
+          
+          docker build -t $IMAGE_NAME:latest .
+          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ steps.build_data.outputs.commit_hash }}
+          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ steps.build_data.outputs.timestamp }}
+          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ steps.build_data.outputs.build_number }}
+          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ steps.build_data.outputs.build_platform }}
+
+          docker push $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:${{ steps.build_data.outputs.commit_hash }}
+          docker push $IMAGE_NAME:${{ steps.build_data.outputs.timestamp }}
+          docker push $IMAGE_NAME:${{ steps.build_data.outputs.build_number }}
+          docker push $IMAGE_NAME:${{ steps.build_data.outputs.build_platform }}
+          
+        
+          #docker build -t $IMAGE_NAME:latest .
+          #docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ steps.vars.outputs.commit_hash }}
+          #docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ steps.vars.outputs.timestamp }}
+          #docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ steps.vars.outputs.build_number }}
+          #docker push -t $IMAGE_NAME:latest .
+          #docker push $IMAGE_NAME:latest $IMAGE_NAME:${{ steps.vars.outputs.commit_hash }}
+          #docker push $IMAGE_NAME:latest $IMAGE_NAME:${{ steps.vars.outputs.timestamp }}
+          #docker push $IMAGE_NAME:latest $IMAGE_NAME:${{ steps.vars.outputs.build_number }}
+
+
+
+
+
+
+
+# name: Build, Test and deploy Emart App from external trigger
+# on:
+#   repository_dispatch:
+#     types: [Triggered-from-App-repo]
+# jobs:
+#   log:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Print event context
+#         run: |
+#           echo "Triggered by: ${{ github.event.client_payload.triggered_by }}"
+#           echo "Update type: ${{ github.event.client_payload.update }}"
   #setup:
   #  name: Checkout repository and set metadata
   #  runs-on: ubuntu-latest
