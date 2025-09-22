@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-deploy
+  namespace: emart-app
+  labels:
+    app: client-deploy-label
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: client-pod
+  template:
+    metadata:
+      labels:
+        app: client-pod
+    spec:
+      containers:
+      - name: client-container
+        image: tayofere/client:16
+        ports:
+        - containerPort: 4200
+          name: client-port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-svc
+  namespace: emart-app
+spec:
+  selector:
+    app: client-pod
+  ports:
+  - protocol: TCP
+    port: 4200
+    targetPort: client-port

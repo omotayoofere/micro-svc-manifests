@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: emartdb-stateful
+  namespace: emart-app
+spec:
+  selector:
+    matchLabels:
+      app: emartdb-stateful-pod
+  serviceName: "emartdb-svc"
+  replicas: 1
+  minReadySeconds: 10
+  template:
+    metadata:
+      labels:
+        app: emartdb-stateful-pod
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: emartdb-container
+        image: mysql:5.7
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom: 
+            secretKeyRef:
+              name: emart-secret
+              key: emartdb-pass
+        - name: MYSQL_DATABASE
+          value: books
+        ports:
+        - containerPort: 3306
+          name: emartdb-port
+        #volumeMounts:
+        #- name: emartdb-storage
+        #  mountPath: /var/lib/mysql
+  #volumeClaimTemplates:
+  #- metadata:
+  #    name: emartdb-storage
+  #  spec:
+  #    accessModes: [ "ReadWriteOnce" ]
+      #storageClassName: "my-storage-class"
+  #    resources:
+  #      requests:
+  #        storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: emartdb
+  namespace: emart-app
+spec:
+  selector:
+    app: emartdb-stateful-pod
+  ports:
+  - protocol: TCP
+    port: 3306
+    targetPort: emartdb-port

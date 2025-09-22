@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: emart-ingress
+  namespace: emart-app
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - emart.xlice.com.ng
+    secretName: emart-tls-secret
+  rules:
+  - host: emart.xlice.com.ng
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: client-svc
+            port:
+              number: 4200
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: api-svc
+            port:
+              number: 5000
+      - path: /webapi
+        pathType: Prefix
+        backend:
+          service:
+            name: webapi-svc
+            port:
+              number: 9000
