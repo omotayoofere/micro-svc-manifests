@@ -29,7 +29,7 @@ jobs:
           
   setup:
     name: Shared_Setup
-    uses: ./.github/workflows/shared-checkout
+    uses: ./.github/workflows/shared-checkout.yml
     with:
       app: dummy
       repo_url: ${{ vars.REPO_URL }}
