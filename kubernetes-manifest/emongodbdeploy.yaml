@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: emongo-statefulset
+  namespace: emart-app
+spec:
+  selector:
+    matchLabels:
+      app: emongo-pod
+  serviceName: "emongo-svc"
+  replicas: 1
+  minReadySeconds: 10
+  template:
+    metadata:
+      labels:
+        app: emongo-pod
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: emongo-container
+        image: mongo:4
+        volumeMounts:
+        - name: mongo-vol
+          mountPath: /var/mongo-data
+        env:
+        - name: MONGO_INITDB_DATABASE
+          value: epoc
+        ports:
+        - containerPort: 27017
+          name: emongo-port
+      volumes:
+      - name: mongo-vol
+        persistentVolumeClaim:
+          claimName: mongo-pvc
+        
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: emongo
+  namespace: emart-app
+spec:
+  selector:
+    app: emongo-pod
+  ports:
+  - protocol: TCP
+    port: 27017
+    targetPort: emongo-port

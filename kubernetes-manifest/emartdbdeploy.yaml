@@ -1,19 +1,18 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: emartdb-stateful
+  name: emartdb
   namespace: emart-app
 spec:
+  replicas: 1
   selector:
     matchLabels:
-      app: emartdb-stateful-pod
-  serviceName: "emartdb-svc"
-  replicas: 1
+      app: emartdb
   minReadySeconds: 10
   template:
     metadata:
       labels:
-        app: emartdb-stateful-pod
+        app: emartdb
     spec:
       terminationGracePeriodSeconds: 10
       containers:
@@ -30,6 +29,13 @@ spec:
         ports:
         - containerPort: 3306
           name: emartdb-port
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-data
+        emptyDir: {}
+
         #volumeMounts:
         #- name: emartdb-storage
         #  mountPath: /var/lib/mysql
@@ -50,7 +56,7 @@ metadata:
   namespace: emart-app
 spec:
   selector:
-    app: emartdb-stateful-pod
+    app: emartdb
   ports:
   - protocol: TCP
     port: 3306
