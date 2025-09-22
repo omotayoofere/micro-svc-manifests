@@ -32,12 +32,12 @@ jobs:
 
       - name: Docker Build and Push
         run: |
-          top_dirs=$(find . -mindepth 1 -maxdepth 1 -type d)
+          apps="client nodeapi javaapi"
           
-          for dir in $top_dirs;
+          for dir in $apps;
           do
-            echo "Subdirs of $dir:"
-            find "$dir" -mindepth 1 -maxdepth 1 -type d 
+            echo "Subdirs of $app:"
+            find "$app" -mindepth 1 -maxdepth 1 -type d 
           done
 
           
