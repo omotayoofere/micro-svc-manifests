@@ -1,0 +1,54 @@
+name: Shared Setup
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        required: true
+        type: string
+      repo_url:
+        required: true
+        type: string
+      repo_branch:
+        required: true
+        type: string
+    outputs:
+      commit_hash:
+        description: "Git commit hash"
+        value: ${{ jobs.setup.outputs.commit_hash }}
+      build_number:
+        description: "Build Number"
+        value: ${{ jobs.setup.outputs.build_number }}
+      timestamp:
+        description: "Build timestamp"
+        value: ${{ jobs.setup.outputs.timestamp }}
+      build_platform:
+        description: "Build timestamp"
+        value: ${{ jobs.setup.outputs.build_platform }}
+
+jobs:
+  setup:
+    name: Checkout_repository_and_set_metadata
+    runs-on: ubuntu-latest
+    outputs:
+      commit_hash: ${{ steps.build_data.outputs.commit_hash }}
+      build_number: ${{ steps.build_data.outputs.build_number }}
+      timestamp: ${{ steps.build_data.outputs.timestamp }}
+      build_platform: ${{ steps.build_data.outputs.build_platform }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+        with:
+          repository: ${{ inputs.repo_url }}
+          ref: ${{ inputs.repo_branch }}
+          token: ${{ secrets.REPO_TOKEN }}
+          fetch-tags: true
+          lfs: true
+          
+      - name: Generate_Build_Metadata
+        id: build_data
+        run: | 
+          echo "commit_hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+          echo "build_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
+          echo "build_platform": "GITHUB_ACTIONS"
