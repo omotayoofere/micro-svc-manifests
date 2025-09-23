@@ -27,6 +27,7 @@ jobs:
           echo "commit_hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           echo "timestamp=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
           echo "build_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
+          echo "build_platform=GITHUB_ACTION" >> $GITHUB_OUTPUT
 
   build_and_push:
     name: Build_and_Push_Docker_Images
