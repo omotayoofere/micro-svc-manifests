@@ -50,6 +50,13 @@ jobs:
         with: 
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+          
+      - name: Debug Output Values
+        run: |
+          echo "Commit Hash: ${{ needs.setup.outputs.commit_hash }}"
+          echo "Timestamp: ${{ needs.setup.outputs.timestamp }}"
+          echo "Build Number: ${{ needs.setup.outputs.build_number }}"
+          echo "Build Platform: ${{ needs.setup.outputs.build_platform }}"
 
       - name: Docker Build and Push
         run: |
