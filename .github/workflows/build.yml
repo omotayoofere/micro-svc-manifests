@@ -4,19 +4,29 @@ on:
   repository_dispatch:
     types: [Triggered-from-App-repo]
 jobs:
-  log:
-    runs-on: 
-      - ubuntu-latest
+  setup:
+    name: Checkout repository and set metadata
+    runs-on: ubuntu-latest
+    outputs:
+      commit_hash: ${{ steps.build_data.outputs.commit_hash }}
+      build_number: ${{ steps.build_data.outputs.build_number }}
+      timestamp: ${{ steps.build_data.outputs.timestamp }}
     steps:
-      - name: Dump Github context
-        env: 
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
-        run: echo "$GITHUB_CONTEXT"
-        
-      - name: Print event context
-        run: |
-          echo "Triggered by: ${{ github.event.client_payload.triggered_by }}"
-          echo "Update type: ${{ github.event.client_payload.update }}"
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+        with:
+          repository: ${{ vars.REPO_URL }}
+          ref: ${{ vars.REPO_BRANCH }}
+          token: ${{ secrets.REPO_TOKEN }}
+          fetch-tags: true
+          lfs: true
+          
+      - name: Generate Build Metadata
+        id: build_data
+        run: | 
+          echo "commit_hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+          echo "build_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
 
 
 # name: Build, Test and deploy Emart App
