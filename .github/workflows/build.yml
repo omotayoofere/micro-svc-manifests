@@ -80,11 +80,13 @@ jobs:
           docker push $IMAGE_NAME:${{ needs.setup.outputs.build_platform }}
 
       
-      - name: Update GitOps repository
-        shell: bash
-        env:
-          GIT_TOKEN: ${{ secrets.GITOPS_PAT }}
-        run: | 
+  update_gitops:
+    name: Update GitOps repository
+    runs-on: ubuntu-latest
+    needs: [setup, build_and_push]
+    steps:
+      - name: Checkout GitOps repo
+        run: |
           git config --global credential.helper store
           git config --global user.name "Github Actions"
           git config --global user.name "actions@github.com"
