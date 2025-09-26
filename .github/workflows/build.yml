@@ -104,6 +104,6 @@ jobs:
 
 
           git add kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
-          git commit -m "Update image to ${{ needs.setup.outputs.build_number }}"
+          git commit --allow-empty -m "Update image to ${{ needs.setup.outputs.build_number }}"
 
           git push -f https://github.com/omotayoofere/emartProject-admin.git k8s
