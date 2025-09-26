@@ -90,7 +90,6 @@ jobs:
           GIT_TOKEN: ${{ secrets.GITOPS_PAT }}
         run: |
           git clone -b k8s https://x-access-token:${{ secrets.GITOPS_PAT }}@github.com/omotayoofere/emartProject-admin.git gitops
-          cd gitops
           
           git config user.name "Github Actions"
           git config user.name "actions@github.com"
