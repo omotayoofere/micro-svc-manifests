@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapi-deploy
+  namespace: emart-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: webapi-pod
+  template:
+    metadata:
+      labels:
+        app: webapi-pod
+    spec:
+      terminationGracePeriodSeconds: 120
+      restartPolicy: Always
+      containers:
+      - name: webapi-container
+        resources:
+          requests:
+            cpu: "0.5"
+            memory: "100Mi"
+          limits:
+            cpu: "0.5"
+            memory: "100Mi"
+        image: tayofere/javaapi:16
+        ports:
+        - containerPort: 9000
+          name: webapi-port
+        readinessProbe:
+          tcpSocket:
+            port: webapi-port
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 5
+        livenessProbe:
+          tcpSocket:
+            port: webapi-port
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 10
+        startupProbe:
+          tcpSocket:
+            port: webapi-port
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapi-svc
+  namespace: emart-app
+spec:
+  selector:
+    app: webapi-pod
+  ports:
+  - protocol: TCP
+    port: 9000
+    targetPort: webapi-port
+    

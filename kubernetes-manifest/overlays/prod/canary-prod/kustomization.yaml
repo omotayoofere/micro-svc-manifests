@@ -1,0 +1,23 @@
+resources:
+  - ./../../../base
+
+namePrefix: canary-
+
+commonLabels:
+  version: new
+
+images:
+  - name: tayofere/client
+    newTag: v1.0.0
+  - name: tayofere/nodeapi
+    newTag: v1.0.0
+  - name: tayofere/javaapi
+    newTag: v1.0.0
+
+replicas:
+  - name: client-deploy
+    count: 1
+  - name: api-deploy
+    count: 1
+  - name: webapi-deploy
+    count: 1

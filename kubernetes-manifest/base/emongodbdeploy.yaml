@@ -15,7 +15,8 @@ spec:
       labels:
         app: emongo-pod
     spec:
-      terminationGracePeriodSeconds: 10
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 120
       containers:
       - name: emongo-container
         image: mongo:4
@@ -28,6 +29,24 @@ spec:
         ports:
         - containerPort: 27017
           name: emongo-port
+        readinessProbe:
+          tcpSocket:
+            port: emongo-port
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 5
+        livenessProbe:
+          tcpSocket:
+            port: emongo-port
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 10
+        startupProbe:
+          tcpSocket:
+            port: emongo-port
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
       volumes:
       - name: mongo-vol
         persistentVolumeClaim:
@@ -41,6 +60,7 @@ metadata:
   name: emongo
   namespace: emart-app
 spec:
+  clusterIP: None
   selector:
     app: emongo-pod
   ports:

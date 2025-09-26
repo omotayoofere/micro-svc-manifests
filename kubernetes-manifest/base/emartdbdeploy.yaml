@@ -14,9 +14,17 @@ spec:
       labels:
         app: emartdb
     spec:
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: 120
+      restartPolicy: Always
       containers:
       - name: emartdb-container
+        resources:
+          requests:
+            cpu: "0.5"
+            memory: "100Mi"
+          limits:
+            cpu: "0.5"
+            memory: "100Mi"
         image: mysql:5.7
         env:
         - name: MYSQL_ROOT_PASSWORD
@@ -29,6 +37,24 @@ spec:
         ports:
         - containerPort: 3306
           name: emartdb-port
+        readinessProbe:
+          tcpSocket:
+            port: emartdb-port
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 5
+        livenessProbe:
+          tcpSocket:
+            port: emartdb-port
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 10
+        startupProbe:
+          tcpSocket:
+            port: emartdb-port
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
         volumeMounts:
         - name: mysql-data
           mountPath: /var/lib/mysql
