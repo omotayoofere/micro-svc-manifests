@@ -89,18 +89,15 @@ jobs:
         env:
           GIT_TOKEN: ${{ secrets.GITOPS_PAT }}
         run: |
+          git clone -b k8s https://github.com/omotayoofere/emartProject-admin.git gitops
+          cd gitops
+          
           git config user.name "Github Actions"
           git config user.name "actions@github.com"
           
           echo "https://${GIT_TOKEN}:x-oauth-basic@github.com" > ~/.git-credentials
 
-          rm -rf gitops
-
-          git clone -b k8s https://github.com/omotayoofere/emartProject-admin.git gitops
-          cd gitops
-
           sed -i 's/^ *newTag: .*/ newTag:${{ needs.setup.outputs.build_number }}/g' kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
-
 
           git add kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
           git commit --allow-empty -m "Update image to ${{ needs.setup.outputs.build_number }}"
