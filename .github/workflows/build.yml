@@ -93,7 +93,7 @@ jobs:
           git clone -b k8s https://github.com/omotayoofere/emartProject-admin.git gitops
           cd gitops
 
-          sed -i 's/^ *newTag: .*/ newTag:${{ needs.setup.outputs.build_number }}/g' kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
+          sed -i 's/^ *newTag: .*/ newTag:${{ needs.setup.outputs.build_number }}/g' gitops/kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
 
           git config --global user.name "Github Actions"
           git config --global user.name "actions@github.com"
