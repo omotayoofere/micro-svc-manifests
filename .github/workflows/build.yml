@@ -86,6 +86,9 @@ jobs:
           GIT_TOKEN: ${{ secrets.GITOPS_PAT }}
         run: | 
           git config --global credential.helper store
+          git config --global user.name "Github Actions"
+          git config --global user.name "actions@github.com"
+          
           echo "https://${GIT_TOKEN}:x-oauth-basic@github.com" > ~/.git-credentials
 
           rm -rf gitops
@@ -95,8 +98,7 @@ jobs:
 
           sed -i 's/^ *newTag: .*/ newTag:${{ needs.setup.outputs.build_number }}/g' kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
 
-          git config --global user.name "Github Actions"
-          git config --global user.name "actions@github.com"
+
           git add kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
           git commit -m "Update image to ${{ needs.setup.outputs.build_number }}"
 
