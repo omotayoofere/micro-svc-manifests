@@ -86,6 +86,8 @@ jobs:
     needs: [setup, build_and_push]
     steps:
       - name: Checkout GitOps repo
+        env:
+          GIT_TOKEN: ${{ secrets.GITOPS_PAT }}
         run: |
           git config --global credential.helper store
           git config --global user.name "Github Actions"
