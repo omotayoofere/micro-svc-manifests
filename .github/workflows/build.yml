@@ -89,9 +89,8 @@ jobs:
         env:
           GIT_TOKEN: ${{ secrets.GITOPS_PAT }}
         run: |
-          git config --global credential.helper store
-          git config --global user.name "Github Actions"
-          git config --global user.name "actions@github.com"
+          git config user.name "Github Actions"
+          git config user.name "actions@github.com"
           
           echo "https://${GIT_TOKEN}:x-oauth-basic@github.com" > ~/.git-credentials
 
