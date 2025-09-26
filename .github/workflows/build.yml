@@ -79,7 +79,32 @@ jobs:
           docker push $IMAGE_NAME:${{ needs.setup.outputs.build_number }}
           docker push $IMAGE_NAME:${{ needs.setup.outputs.build_platform }}
 
+      
+      - name: Update GitOps repository
+        shell: bash
+        env:
+          GIT_TOKEN: ${{ secrets.GITOPS_PAT }}
+        run: | 
+          git config --global credential.helper store
+          echo "https://${GIT_TOKEN}:x-oauth-basic@github.com" > ~/.git-credentials
 
+          rm -rf gitops
+
+          git clone -b k8s https://github.com/omotayoofere/emartProject-admin.git gitops
+          cd gitops
+
+          sed -i 's/^ *newTag: .*/ newTag:${{ needs.setup.outputs.build_number }}/g' kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
+
+          git config --global user.name "Github Actions"
+          git config --global user.name "actions@github.com"
+          git add kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
+          git commit -m "Update image to ${{ needs.setup.outputs.build_number }}"
+
+          git push -f https://github.com/omotayoofere/emartProject-admin.git k8s
+
+          
+          
+  
 # name: Build, Test and deploy Emart App
 # on:
 #   push:
