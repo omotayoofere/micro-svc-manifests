@@ -8,11 +8,11 @@ commonLabels:
 
 images:
   - name: tayofere/client
-    newTag: 25
+    newTag:25
   - name: tayofere/nodeapi
-    newTag: 25
+    newTag:25
   - name: tayofere/javaapi
-    newTag: 25
+    newTag:25
 
 replicas:
   - name: client-deploy
