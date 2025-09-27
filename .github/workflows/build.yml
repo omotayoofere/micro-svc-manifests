@@ -102,10 +102,10 @@ jobs:
         with:
           token: ${{ secrets.SNYK_TOKEN }}
 
-      - name: Snyk authenticate
-        run: snyk auth --auth-type=token
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      # - name: Snyk authenticate
+      #   run: snyk auth --auth-type=token
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Snyk Container Monitor
         run: snyk container monitor ${{ vars.DOCKER_USERNAME }}/client --file=Dockerfile
