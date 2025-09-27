@@ -44,7 +44,7 @@ jobs:
         uses: snyk/actions@0.4.0
         with:
           command: test
-          args: --file=package.json --project-name=emart-client
+          args: --file=client/package.json --project-name=emart-client
           project: ./client
         env:
           SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
@@ -53,7 +53,7 @@ jobs:
         uses: snyk/actions@0.4.0
         with:
           command: test
-          args: --file=pom.xml --project-name=emart-java
+          args: --file=javaapi/pom.xml --project-name=emart-java
           project: ./java
         env:
           SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
@@ -62,7 +62,7 @@ jobs:
         uses: snyk/actions@0.4.0
         with:
           command: test
-          args: --file=package.json --project-name=emart-nodeapi
+          args: --file=nodeapi/package.json --project-name=emart-nodeapi
           project: ./node
         env:
           SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
