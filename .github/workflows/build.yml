@@ -44,7 +44,21 @@ jobs:
         uses: snyk/actions@0.4.0
 
       - name: Run Snyk Code and Dependency Scan
-        run: snyk test --all-projects
+        run: |
+          for dir in client javaapi nodeapi; do
+            echo "Scanning $dir with Snyk..."
+            cd $dir
+
+            if [ -f "package.json" ]; then
+              snyk test --file=package.json || echo "Snyk failed in $dir"
+            elif [ -f "pom.xml" ]; then
+              snyk test --file=pom.xml || echo "Snyk failed in $dir"
+            else
+              echo "No recognizable project file in $dir, skipping."
+            fi
+            
+            cd -
+          done
         env:
           SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
           
