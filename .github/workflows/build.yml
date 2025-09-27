@@ -21,6 +21,23 @@ jobs:
           token: ${{ secrets.REPO_TOKEN }}
           fetch-tags: true
           lfs: true
+
+      - name: Setup SonarQube
+        uses: Warchant/setup-sonar-scanner@v8
+
+      - name: Analyze with SonarCloud
+        uses: SonarSource/sonarcloud-github-action@v5.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+            -Dsonar.host.url=${{ vars.SONAR_URL }}
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.sources=src/
+            -Dsonar.verbose=true
           
       - name: Generate Build Metadata
         id: build_data
