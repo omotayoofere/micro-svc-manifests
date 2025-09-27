@@ -23,7 +23,9 @@ jobs:
           lfs: true
 
       - name: Build Java Project
-        run: ./mvnw clean install
+        run: |
+          cd javaapi
+          ./mvnw clean install
 
       - name: Setup SonarQube
         uses: Warchant/setup-sonar-scanner@v8
