@@ -103,7 +103,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
 
       - name: Snyk authenticate
-        run: snyk authenticate ${{ secrets.SYNK_TOKEN }}
+        run: snyk authenticate --token=${{ secrets.SYNK_TOKEN }}
 
       - name: Snyk Container Monitor
         run: snyk container monitor ${{ vars.DOCKER_USERNAME }}/client --file=Dockerfile
