@@ -25,6 +25,7 @@ jobs:
       - name: Build Java Project
         run: |
           cd javaapi
+          chmod +x mvnw
           ./mvnw clean install
 
       - name: Setup SonarQube
