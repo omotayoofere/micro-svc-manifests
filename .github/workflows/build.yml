@@ -40,25 +40,30 @@ jobs:
             -Dsonar.exclusions=**/*.java
             -Dsonar.verbose=true
 
-      - name: Install Snyk CLI
+      - name: Snyk scan for client
         uses: snyk/actions@0.4.0
+        with:
+          command: test
+          args: --file=package.json --project-name=emart-client
+          project: ./client
+        env:
+          SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
 
-      - name: Run Snyk Code and Dependency Scan
-        run: |
-          for dir in client javaapi nodeapi; do
-            echo "Scanning $dir with Snyk..."
-            cd $dir
+      - name: Snyk scan for javaapi
+        uses: snyk/actions@0.4.0
+        with:
+          command: test
+          args: --file=pom.xml --project-name=emart-java
+          project: ./java
+        env:
+          SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
 
-            if [ -f "$dir/package.json" ]; then
-              snyk test --file=package.json --path=$dir -project-name="$dir"
-            elif [ -f "$dir/pom.xml" ]; then
-              snyk test --file=pom.xml --path=$dir -project-name="$dir"
-            else
-              echo "No recognizable project file in $dir, skipping."
-            fi
-            
-            cd -
-          done
+      - name: Snyk scan for nodeapi
+        uses: snyk/actions@0.4.0
+        with:
+          command: test
+          args: --file=package.json --project-name=emart-nodeapi
+          project: ./node
         env:
           SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
           
