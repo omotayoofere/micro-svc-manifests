@@ -39,33 +39,6 @@ jobs:
             -Dsonar.sources=.
             -Dsonar.exclusions=**/*.java
             -Dsonar.verbose=true
-
-      - name: Snyk scan for client
-        uses: snyk/actions@0.4.0
-        with:
-          command: test
-          args: --file=client/package.json --project-name=emart-client
-          project: ./client
-        env:
-          SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
-
-      - name: Snyk scan for javaapi
-        uses: snyk/actions@0.4.0
-        with:
-          command: test
-          args: --file=javaapi/pom.xml --project-name=emart-java
-          project: ./java
-        env:
-          SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
-
-      - name: Snyk scan for nodeapi
-        uses: snyk/actions@0.4.0
-        with:
-          command: test
-          args: --file=nodeapi/package.json --project-name=emart-nodeapi
-          project: ./node
-        env:
-          SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
           
       - name: Generate Build Metadata
         id: build_data
@@ -124,6 +97,27 @@ jobs:
           docker push $IMAGE_NAME:${{ needs.setup.outputs.build_number }}
           docker push $IMAGE_NAME:${{ needs.setup.outputs.build_platform }}
 
+      - name: Install Snyk CLI
+        uses: snyk/actions/setup@master
+        with:
+          SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
+
+      - name: Snyk authenticate
+        run: snyk authenticate ${{ secrets.SYNK_TOKEN }}
+
+      - name: Snyk Container Monitor
+        run: snyk container monitor ${{ vars.DOCKER_USERNAME }}/client --file=Dockerfile
+        working-directory: ./client
+
+      - name: Run Snyk to check for vulnerability in Docker image
+        uses: snyk/actions/docker@master
+        with:
+          image: ${{ vars.DOCKER_USERNAME }}/client
+          args: --file=client/Dockerfile --severity-threshold=high
+        env: 
+          SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
+        continue-on-error: true
+
       - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@0.33.1
         with:
@@ -136,11 +130,24 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif
+          
+  k8s-manifest-scan:
+    needs: [setup, build_and_push]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Runs Snyk yo check kubernetes manifest files fo issues
+        uses: snyk/actions/iac@master
+        env: 
+          SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
+        with: 
+          file: kubernetes-manifest
+          args: --severity-threshold=high
       
   update_gitops:
     name: Update GitOps repository
     runs-on: ubuntu-latest
-    needs: [setup, build_and_push]
+    needs: [setup, build_and_push, k8s-manifest-scan]
     steps:
       - name: Checkout GitOps repo
         env:
