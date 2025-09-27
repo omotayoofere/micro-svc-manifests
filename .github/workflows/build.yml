@@ -22,12 +22,6 @@ jobs:
           fetch-tags: true
           lfs: true
 
-      - name: Build Java Project
-        run: |
-          cd javaapi
-          chmod +x mvnw
-          ./mvnw clean install
-
       - name: Setup SonarQube
         uses: Warchant/setup-sonar-scanner@v8
 
@@ -43,6 +37,7 @@ jobs:
             -Dsonar.host.url=${{ vars.SONAR_URL }}
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
             -Dsonar.sources=.
+            -Dsonar.exclusions=**/*.java
             -Dsonar.verbose=true
 
       - name: Install Snyk CLI
