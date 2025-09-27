@@ -98,14 +98,14 @@ jobs:
           docker push $IMAGE_NAME:${{ needs.setup.outputs.build_platform }}
 
       - name: Install Snyk CLI
-        uses: snyk/actions/setup@v2
+        uses: snyk/actions/setup@master
         with:
           token: ${{ secrets.SNYK_TOKEN }}
 
-      # - name: Snyk authenticate
-      #   run: snyk auth --auth-type=token
-      #   env:
-      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Snyk authenticate
+        run: snyk auth --auth-type=token
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Snyk Container Monitor
         run: snyk container monitor ${{ vars.DOCKER_USERNAME }}/client --file=Dockerfile
@@ -114,7 +114,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Run Snyk to check for vulnerability in Docker image
-        uses: snyk/actions/docker@v2
+        uses: snyk/actions/docker@master
         with:
           image: ${{ vars.DOCKER_USERNAME }}/client
           args: --file=client/Dockerfile --severity-threshold=high
