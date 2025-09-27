@@ -100,12 +100,12 @@ jobs:
       - name: Install Snyk CLI
         uses: snyk/actions/setup@master
         with:
-          SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Snyk authenticate
         run: snyk auth --auth-type=token
         env:
-          SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Snyk Container Monitor
         run: snyk container monitor ${{ vars.DOCKER_USERNAME }}/client --file=Dockerfile
@@ -117,7 +117,7 @@ jobs:
           image: ${{ vars.DOCKER_USERNAME }}/client
           args: --file=client/Dockerfile --severity-threshold=high
         env: 
-          SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         continue-on-error: true
 
       - name: Run Trivy Vulnerability Scanner
