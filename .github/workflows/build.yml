@@ -99,8 +99,6 @@ jobs:
 
       - name: Install Snyk CLI
         uses: snyk/actions/setup@master
-        with:
-          token: ${{ secrets.SNYK_TOKEN }}
 
       - name: Snyk authenticate
         run: snyk auth --auth-type=token
