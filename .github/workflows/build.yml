@@ -38,6 +38,14 @@ jobs:
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
             -Dsonar.sources=src/
             -Dsonar.verbose=true
+
+      - name: Install Snyk CLI
+        uses: snyk/actions@0.4.0
+
+      - name: Run Snyk Code and Dependency Scan
+        run: snyk test --all-projects
+        env:
+          SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
           
       - name: Generate Build Metadata
         id: build_data
@@ -96,6 +104,18 @@ jobs:
           docker push $IMAGE_NAME:${{ needs.setup.outputs.build_number }}
           docker push $IMAGE_NAME:${{ needs.setup.outputs.build_platform }}
 
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: 'docker.io/${{ vars.DOCKER_USERNAME }}/${{ matrix.app }}'
+          severity: 'CRITICAL,HIGH'
+          output: 'trivy-results.sarif'
+          format: 'sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
       
   update_gitops:
     name: Update GitOps repository
