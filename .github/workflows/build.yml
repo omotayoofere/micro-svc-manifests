@@ -49,10 +49,10 @@ jobs:
           echo "build_platform=GITHUB_ACTION" >> $GITHUB_OUTPUT
 
           echo "🔧 Metadata generated:"
-          echo " - commit_hash: $COMMIT_HASH"
-          echo " - timestamp: $TIMESTAMP"
-          echo " - build_number: $BUILD_NUMBER"
-          echo " - build_platform: $BUILD_PLATFORM"
+          echo " - commit_hash: $(git rev-parse --short HEAD)"
+          echo " - timestamp: $(date +%Y%m%d%H%M%S)"
+          echo " - build_number: ${{ github.run_number }}"
+          echo " - build_platform: GITHUB_ACTION"
 
   build_and_push:
     name: Build_and_Push_Docker_Images
