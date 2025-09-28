@@ -170,8 +170,14 @@ jobs:
           git config user.email "actions@github.com"
 
           export BUILD_TAG="${{ needs.setup.outputs.build_number }}"
+
+          echo "🔍 Before update:"
+          cat kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
           
-          sed -i "s/^ *newTag: .*/ newTag: ${BUILD_TAG}/" kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
+          sed -i "s/^[[:space:]]*newTag:[[:space:]]*.*/newTag: ${BUILD_TAG}/" kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
+
+          echo "✅ After update:"
+          cat kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
 
           git add kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
           git commit --allow-empty -m "Update image to ${{ needs.setup.outputs.build_number }}"
