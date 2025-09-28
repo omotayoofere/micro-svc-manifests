@@ -48,6 +48,12 @@ jobs:
           echo "build_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
           echo "build_platform=GITHUB_ACTION" >> $GITHUB_OUTPUT
 
+          echo "🔧 Metadata generated:"
+          echo " - commit_hash: $COMMIT_HASH"
+          echo " - timestamp: $TIMESTAMP"
+          echo " - build_number: $BUILD_NUMBER"
+          echo " - build_platform: $BUILD_PLATFORM"
+
   build_and_push:
     name: Build_and_Push_Docker_Images
     runs-on: ubuntu-latest
