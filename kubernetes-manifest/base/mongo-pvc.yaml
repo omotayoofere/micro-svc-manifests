@@ -12,6 +12,6 @@ spec:
   resources:
     requests:
       storage: 200Mi
-  selector:
-    matchLabels:
-      environment: "dev"
+  # selector:
+  #   matchLabels:
+  #     environment: "dev"

@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: elasticsearch-pv
+spec:
+  capacity:
+    storage: 500Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  local:
+    path: /mnt/data/
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-node-1
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: elasticsearch-pvc
+  namespace: logging
+spec:
+  storageClassName: "" # Empty string must be explicitly set otherwise default StorageClass will be set
+  volumeName: elasticsearch-pv
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 400Mi
+  selector:
+    matchLabels:
+      environment: "dev"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+  namespace: logging
+spec:
+  selector:
+    matchLabels:
+      app: elasticsearch-pod
+  serviceName: "elasticsearch-svc"
+  replicas: 1
+  minReadySeconds: 10
+  template:
+    metadata:
+      labels:
+        app: elasticsearch-pod
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 120
+      containers:
+      - name: elasticsearch-container
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+        resources:
+          requests:
+            cpu: "0.5"
+            memory: "100Mi"
+          limits:
+            cpu: "0.5"
+            memory: "100Mi"
+        volumeMounts:
+          - name: elastic-vol
+            mountPath: /usr/share/elasticsearch/data
+        env:
+          - name: discovery.type
+            value: single-node
+          - name: ES_JAVA_OPTS
+            value: "-Xms512m -Xmx512m"
+          - name: xpack.security.enabled
+            value: "false"
+        ports:
+          - containerPort: 9200
+            name: elasticsearch-port
+        readinessProbe:
+          tcpSocket:
+            port: elasticsearch-port
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 5
+        livenessProbe:
+          tcpSocket:
+            port: elasticsearch-port
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 10
+        startupProbe:
+          tcpSocket:
+            port: elasticsearch-port
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+      volumes:
+      - name: elastic-vol
+        persistentVolumeClaim:
+          claimName: elasticsearch-pvc
+        
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-svc
+  namespace: logging
+spec:
+  clusterIP: None
+  selector:
+    app: elasticsearch-pod
+  ports:
+  - protocol: TCP
+    port: 9200
+    targetPort: elasticsearch-port

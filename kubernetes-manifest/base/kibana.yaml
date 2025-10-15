@@ -1,31 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webapi-deploy
-  namespace: emart-app
+  name: kibana
+  namespace: logging
 spec:
-  replicas: 2
   selector:
     matchLabels:
-      app: webapi-pod
+      app: kibana-pod
+  serviceName: "kibana-svc"
+  replicas: 1
+  minReadySeconds: 10
   template:
     metadata:
       labels:
-        app: webapi-pod
+        app: kibana-pod
     spec:
-      # affinity:
-      #   podAntiAffinity:
-      #     preferredDuringSchedulingIgnoredDuringExecution:
-      #     - weight: 100
-      #       podAffinityTerm:
-      #         topologyKey: topology.kubernetes.io/hostname
-      #         labelSelector:
-      #           matchLabels:
-      #             app: security
-      terminationGracePeriodSeconds: 120
       restartPolicy: Always
+      terminationGracePeriodSeconds: 120
       containers:
-      - name: webapi-container
+      - name: kibana-container
+        image: docker.elastic.co/kibana/kibana:7.17.0
         resources:
           requests:
             cpu: "0.5"
@@ -33,40 +27,42 @@ spec:
           limits:
             cpu: "0.5"
             memory: "100Mi"
-        image: tayofere/javaapi:16
+        env:
+          - name: ELASTICSEARCH_HOSTS
+            value: http://elasticsearch-svc:9200
         ports:
-        - containerPort: 9000
-          name: webapi-port
+          - containerPort: 5601
+            name: kibana-port
         readinessProbe:
           tcpSocket:
-            port: webapi-port
+            port: kibana-port
           initialDelaySeconds: 10
           periodSeconds: 5
           failureThreshold: 5
         livenessProbe:
           tcpSocket:
-            port: webapi-port
+            port: kibana-port
           initialDelaySeconds: 5
           periodSeconds: 10
           failureThreshold: 10
         startupProbe:
           tcpSocket:
-            port: webapi-port
+            port: kibana-port
           initialDelaySeconds: 5
           periodSeconds: 10
           failureThreshold: 3
-
+        
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: webapi-svc
-  namespace: emart-app
+  name: kibana-svc
+  namespace: logging
 spec:
+  clusterIP: None
   selector:
-    app: webapi-pod
+    app: kibana-pod
   ports:
   - protocol: TCP
-    port: 9000
-    targetPort: webapi-port
-    
+    port: 5601
+    targetPort: kibana-port
