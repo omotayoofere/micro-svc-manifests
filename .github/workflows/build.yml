@@ -21,6 +21,24 @@ jobs:
           token: ${{ secrets.REPO_TOKEN }}
           fetch-tags: true
           lfs: true
+
+      - name: Setup SonarQube
+        uses: Warchant/setup-sonar-scanner@v8
+
+      - name: Analyze with SonarCloud
+        uses: SonarSource/sonarcloud-github-action@v5.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+            -Dsonar.host.url=${{ vars.SONAR_URL }}
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.sources=.
+            -Dsonar.exclusions=**/*.java
+            -Dsonar.verbose=true
           
       - name: Generate Build Metadata
         id: build_data
@@ -29,6 +47,12 @@ jobs:
           echo "timestamp=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
           echo "build_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
           echo "build_platform=GITHUB_ACTION" >> $GITHUB_OUTPUT
+
+          echo "🔧 Metadata generated:"
+          echo " - commit_hash: $(git rev-parse --short HEAD)"
+          echo " - timestamp: $(date +%Y%m%d%H%M%S)"
+          echo " - build_number: ${{ github.run_number }}"
+          echo " - build_platform: GITHUB_ACTION"
 
   build_and_push:
     name: Build_and_Push_Docker_Images
@@ -79,11 +103,61 @@ jobs:
           docker push $IMAGE_NAME:${{ needs.setup.outputs.build_number }}
           docker push $IMAGE_NAME:${{ needs.setup.outputs.build_platform }}
 
+      - name: Install Snyk CLI
+        uses: snyk/actions/setup@master
+        with:
+          snyk-token: ${{ secrets.SNYK_TOKEN }} 
+
+      - name: Snyk authenticate
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+        # env:
+        #   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Snyk Container Monitor
+        run: snyk container monitor ${{ vars.DOCKER_USERNAME }}/client --file=Dockerfile
+        working-directory: ./client
+        env: 
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Run Snyk to check for vulnerability in Docker image
+        uses: snyk/actions/docker@master
+        with:
+          image: ${{ vars.DOCKER_USERNAME }}/client
+          args: --file=client/Dockerfile --severity-threshold=high
+        env: 
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: 'docker.io/${{ vars.DOCKER_USERNAME }}/${{ matrix.app }}'
+          severity: 'CRITICAL,HIGH'
+          output: 'trivy-results.sarif'
+          format: 'sarif'
+
+      # - name: Upload Trivy scan results to GitHub Security tab
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with:
+      #     sarif_file: trivy-results.sarif
+          
+  k8s-manifest-scan:
+    needs: [setup, build_and_push]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Runs Snyk yo check kubernetes manifest files fo issues
+        uses: snyk/actions/iac@master
+        env: 
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with: 
+          file: kubernetes-manifest
+          args: --severity-threshold=high
       
   update_gitops:
     name: Update GitOps repository
     runs-on: ubuntu-latest
-    needs: [setup, build_and_push]
+    needs: [setup, build_and_push, k8s-manifest-scan]
     steps:
       - name: Checkout GitOps repo
         env:
@@ -96,8 +170,14 @@ jobs:
           git config user.email "actions@github.com"
 
           export BUILD_TAG="${{ needs.setup.outputs.build_number }}"
+
+          echo "🔍 Before update:"
+          cat kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
           
-          sed -i "s/^ *newTag: .*/ newTag: ${BUILD_TAG}/" kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
+          sed -i "s/^[[:space:]]*newTag:[[:space:]]*.*/newTag: ${BUILD_TAG}/" kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
+
+          echo "✅ After update:"
+          cat kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
 
           git add kubernetes-manifest/overlays/prod/canary-prod/kustomization.yaml
           git commit --allow-empty -m "Update image to ${{ needs.setup.outputs.build_number }}"
