@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: emongo-statefulset
   namespace: emart-app
@@ -7,7 +7,7 @@ spec:
   selector:
     matchLabels:
       app: emongo-pod
-  serviceName: "emongo-svc"
+  #serviceName: "emongo"
   replicas: 1
   minReadySeconds: 10
   template:
@@ -20,6 +20,13 @@ spec:
       containers:
       - name: emongo-container
         image: mongo:4
+        resources:
+          requests:
+            cpu: "0.2"
+            memory: "100Mi"
+          limits:
+            cpu: "0.2"
+            memory: "100Mi"
         volumeMounts:
         - name: mongo-vol
           mountPath: /var/mongo-data
@@ -60,7 +67,7 @@ metadata:
   name: emongo
   namespace: emart-app
 spec:
-  clusterIP: None
+  #clusterIP: None
   selector:
     app: emongo-pod
   ports:

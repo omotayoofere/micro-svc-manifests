@@ -4,14 +4,14 @@ metadata:
   name: mongo-pvc
   namespace: emart-app
 spec:
-  storageClassName: "" # Empty string must be explicitly set otherwise default StorageClass will be set
-  volumeName: mongo-pv
-  volumeMode: Filesystem
+  storageClassName: ebs-sc # Empty string must be explicitly set otherwise default StorageClass will be set
+  # volumeName: mongo-pv
+  # volumeMode: Filesystem
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
-      storage: 200Mi
+      storage: 1Gi
   # selector:
   #   matchLabels:
   #     environment: "dev"

@@ -4,7 +4,7 @@ metadata:
   name: webapi-deploy
   namespace: emart-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: webapi-pod
@@ -29,11 +29,11 @@ spec:
         resources:
           requests:
             cpu: "0.5"
-            memory: "100Mi"
+            memory: "600Mi"
           limits:
             cpu: "0.5"
-            memory: "100Mi"
-        image: tayofere/javaapi:16
+            memory: "600Mi"
+        image: tayofere/javaapi:64
         ports:
         - containerPort: 9000
           name: webapi-port
