@@ -14,7 +14,7 @@ spec:
         app: webapi-pod
     spec:
       imagePullSecrets:
-      - name: ghcr-secret  # Add this
+      - name: ghcr-secret
       # affinity:
       #   podAntiAffinity:
       #     preferredDuringSchedulingIgnoredDuringExecution:
