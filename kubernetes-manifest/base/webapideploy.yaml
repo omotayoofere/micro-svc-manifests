@@ -33,7 +33,7 @@ spec:
           limits:
             cpu: "0.5"
             memory: "600Mi"
-        image: ghcr.io/omotayoofere/java-api:5b4c56f
+        image: ghcr.io/omotayoofere/java-api:sha-93144a6
         ports:
         - containerPort: 9000
           name: webapi-port
