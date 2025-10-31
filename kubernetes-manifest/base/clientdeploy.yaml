@@ -27,7 +27,7 @@ spec:
       #       secretProviderClass: aws-secrets
       containers:
       - name: client-container
-        image: ghcr.io/omotayoofere/client-api:sha-0fa6719
+        image: ghcr.io/omotayoofere/client-api:sha-c458633
         ports:
         - containerPort: 4200
           name: client-port
