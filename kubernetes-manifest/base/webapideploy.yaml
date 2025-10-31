@@ -13,9 +13,9 @@ spec:
       labels:
         app: webapi-pod
     spec:
-      serviceAccountName: aws-secret-sa
-      imagePullSecrets:
-      - name: ghcr-secret
+      # serviceAccountName: aws-secret-sa
+      # imagePullSecrets:
+      # - name: ghcr-secret
       # affinity:
       #   podAntiAffinity:
       #     preferredDuringSchedulingIgnoredDuringExecution:
@@ -27,13 +27,13 @@ spec:
       #             app: security
       terminationGracePeriodSeconds: 120
       restartPolicy: Always
-      volumes:
-      - name: secrets-store-inline
-        csi:
-          driver: secrets-store.csi.k8s.io
-          readOnly: true
-          volumeAttributes:
-            secretProviderClass: aws-secrets
+      # volumes:
+      # - name: secrets-store-inline
+      #   csi:
+      #     driver: secrets-store.csi.k8s.io
+      #     readOnly: true
+      #     volumeAttributes:
+      #       secretProviderClass: aws-secrets
       containers:
       - name: webapi-container
         image: ghcr.io/omotayoofere/java-api:sha-404f7ec
@@ -47,10 +47,10 @@ spec:
           limits:
             cpu: "0.5"
             memory: "600Mi"
-        volumeMounts:
-            - name: secrets-store-inline
-              mountPath: /mnt/secrets
-              readOnly: true
+        # volumeMounts:
+        #     - name: secrets-store-inline
+        #       mountPath: /mnt/secrets
+        #       readOnly: true
         readinessProbe:
           tcpSocket:
             port: webapi-port
