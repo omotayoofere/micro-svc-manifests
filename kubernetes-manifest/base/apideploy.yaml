@@ -14,8 +14,8 @@ spec:
         app: api-pod
     spec:
       # serviceAccountName: aws-secret-sa
-      # imagePullSecrets:
-      # - name: ghcr-secret
+      imagePullSecrets:
+      - name: ghcr-credentials
       terminationGracePeriodSeconds: 120
       restartPolicy: Always
       # volumes:
