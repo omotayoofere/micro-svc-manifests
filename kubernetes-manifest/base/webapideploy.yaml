@@ -36,7 +36,7 @@ spec:
       #       secretProviderClass: aws-secrets
       containers:
       - name: webapi-container
-        image: ghcr.io/omotayoofere/java-api:sha-52fe9e6
+        image: 074360085759.dkr.ecr.us-east-1.amazonaws.com/omotayoofere/java-api:sha-a1df244
         ports:
         - containerPort: 9000
           name: webapi-port
