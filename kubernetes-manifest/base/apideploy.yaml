@@ -27,7 +27,7 @@ spec:
       #       secretProviderClass: aws-secrets
       containers:
       - name: api-container
-        image: ghcr.io/omotayoofere/node-api:sha-a1aede9
+        image: ghcr.io/omotayoofere/node-api:sha-e80bbaf
         ports:
         - containerPort: 5000
           name: api-port
